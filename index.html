@@ -92,6 +92,16 @@
   .services h3 { font-family: var(--display); font-weight: 600; font-size: 1.2rem; line-height: 1.6; }
   .services p { color: var(--muted); font-size: .975rem; line-height: 1.75; }
 
+  /* Gallery */
+  .products { list-style: none; padding: 0; margin-top: 2rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.75rem 1rem; }
+  @media (min-width: 52rem) { .products { grid-template-columns: repeat(4, 1fr); gap: 2.25rem 1.25rem; } }
+  .product .ph { aspect-ratio: 4 / 3; background: var(--alt); border-radius: 12px; overflow: hidden; display: grid; place-items: center; color: var(--muted); }
+  .product img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .product .ph svg { width: 68%; height: auto; }
+  .product h3 { font-family: var(--display); font-weight: 600; font-size: 1rem; line-height: 1.6; margin-top: .6rem; }
+  .product .price { color: var(--accent); font-weight: 600; }
+  .visit { border-top: 1px solid var(--line); }
+
   /* Frame finder */
   .finder { margin-top: 2rem; display: grid; gap: 2rem; grid-template-columns: 1fr; }
   @media (min-width: 52rem) { .finder { grid-template-columns: 15rem 1fr; gap: 3.5rem; align-items: start; } }
@@ -150,7 +160,7 @@
     </a>
     <nav aria-label="التنقل الرئيسي">
       <a href="#services">خدماتنا</a>
-      <a href="#frames">اختر إطارك</a>
+      <a href="#gallery">المعرض</a>
       <a href="#book">احجز</a>
     </nav>
   </div>
@@ -187,7 +197,15 @@
     </div>
   </section>
 
-  <section id="frames" aria-labelledby="frames-h">
+  <section id="gallery" aria-labelledby="gallery-h">
+    <div class="wrap">
+      <h2 id="gallery-h">معرض النظارات</h2>
+      <p class="lead">بعض الإطارات المتوفرة لدينا. للاستفسار عن غيرها اتصل بنا أو زرنا.</p>
+      <ul class="products" id="products"></ul>
+    </div>
+  </section>
+
+  <section class="alt" id="frames" aria-labelledby="frames-h">
     <div class="wrap">
       <h2 id="frames-h">اختر إطارك حسب شكل وجهك</h2>
       <p class="lead">اضغط على شكل وجهك لترى الإطارات الأنسب له.</p>
@@ -198,13 +216,13 @@
     </div>
   </section>
 
-  <section class="alt visit" id="visit" aria-labelledby="visit-h">
+  <section class="visit" id="visit" aria-labelledby="visit-h">
     <div class="wrap">
       <div>
         <h2 id="visit-h">زورونا</h2>
         <dl>
           <div><dt>العنوان</dt><dd>كربلاء المقدسة، مجمع نور العباس الطبي، مجاور مستشفى العباس (ع) الأهلي</dd></div>
-          <div><dt>ساعات العمل</dt><dd>مِن 3 عصراً حتى ١٠ ليلاً</dd></div>
+          <div><dt>ساعات العمل</dt><dd>من ٤ عصراً حتى ١٠ ليلاً</dd></div>
           <div><dt>الهاتف</dt><dd><a href="tel:07732906486" dir="ltr">0773 290 6486</a></dd></div>
         </dl>
       </div>
@@ -252,6 +270,20 @@
 </footer>
 
 <script>
+  /* ================= معرض النظارات =================
+     كل سطر = نظارة واحدة. لإضافة نظارة انسخ سطراً كاملاً والصقه تحته وغيّر القيم.
+       img   : اسم ملف الصورة كما رفعته إلى GitHub (مثل frame1.jpg)
+       name  : اسم أو وصف الإطار
+       price : السعر
+     انتبه: أبقِ علامات ' و , كما هي. */
+  var PRODUCTS = [
+    { img: 'frame1.jpg', name: 'إطار ١', price: 'السعر هنا' },
+    { img: 'frame2.jpg', name: 'إطار ٢', price: 'السعر هنا' },
+    { img: 'frame3.jpg', name: 'إطار ٣', price: 'السعر هنا' },
+    { img: 'frame4.jpg', name: 'إطار ٤', price: 'السعر هنا' }
+  ];
+  /* ============== نهاية معرض النظارات ============== */
+
   /* ---- Frame finder ---- */
   var FRAMES = {
     rect:    { name: 'مستطيل',     lens: '<rect x="26" y="18" width="58" height="40" rx="9"/>' },
@@ -322,38 +354,54 @@
   dateEl.min = iso; dateEl.value = iso;
 
   document.getElementById('bookForm').addEventListener('submit', function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  var summary = document.getElementById('summary');
-  var name = document.getElementById('name').value.trim();
-  var svc = document.getElementById('service');
+    var summary = document.getElementById('summary');
+    var name = document.getElementById('name').value.trim();
+    var svc = document.getElementById('service');
 
-  if (!name || !dateEl.value) {
-    summary.textContent = 'اكتب اسمك واختر التاريخ ثم أعد الإرسال.';
+    if (!name || !dateEl.value) {
+      summary.textContent = 'اكتب اسمك واختر التاريخ ثم أعد الإرسال.';
+      summary.classList.add('show');
+      return;
+    }
+
+    var d = new Date(dateEl.value + 'T12:00:00');
+    var dateText = d.toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    var message =
+      'السلام عليكم، أريد حجز موعد في الدقة للبصريات\n\n' +
+      'الاسم: ' + name + '\n' +
+      'الخدمة: ' + svc.value + '\n' +
+      'التاريخ: ' + dateText + '\n' +
+      'الوقت: ' + timeEl.value;
+
+    var whatsappUrl = 'https://wa.me/9647853371010?text=' + encodeURIComponent(message);
+
+    summary.textContent = 'جارٍ فتح واتساب، اضغط إرسال هناك لإتمام الحجز. إن لم يفتح اضغط ';
+    var link = document.createElement('a');
+    link.href = whatsappUrl; link.target = '_blank'; link.rel = 'noopener';
+    link.textContent = 'هنا';
+    summary.appendChild(link);
     summary.classList.add('show');
-    return;
-  }
 
-  var d = new Date(dateEl.value + 'T12:00:00');
-  var dateText = d.toLocaleDateString('ar', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long'
+    window.location.href = whatsappUrl;
   });
 
-  var message =
-    'السلام عليكم، أريد حجز موعد في الدقة للبصريات\n\n' +
-    'الاسم: ' + name + '\n' +
-    'الخدمة: ' + svc.value + '\n' +
-    'التاريخ: ' + dateText + '\n' +
-    'الوقت: ' + timeEl.value;
-
-  var whatsappUrl =
-    'https://wa.me/9647853371010?text=' +
-    encodeURIComponent(message);
-
-  window.open(whatsappUrl, '_blank');
-
-  summary.textContent = 'سيتم فتح واتساب لإرسال طلب الموعد.';
-  summary.classList.add('show');
-});
+  /* ---- Render gallery ---- */
+  var prodEl = document.getElementById('products');
+  PRODUCTS.forEach(function (p) {
+    var li = document.createElement('li'); li.className = 'product';
+    var ph = document.createElement('div'); ph.className = 'ph';
+    var img = document.createElement('img');
+    img.src = p.img; img.alt = p.name; img.loading = 'lazy';
+    img.addEventListener('error', function () { ph.textContent = ''; ph.innerHTML = frameSvg('round'); });
+    ph.appendChild(img);
+    var h = document.createElement('h3'); h.textContent = p.name;
+    var pr = document.createElement('div'); pr.className = 'price'; pr.textContent = p.price;
+    li.appendChild(ph); li.appendChild(h); li.appendChild(pr);
+    prodEl.appendChild(li);
+  });
+</script>
+</body>
+</html>
