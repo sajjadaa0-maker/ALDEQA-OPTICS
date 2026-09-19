@@ -322,21 +322,38 @@
   dateEl.min = iso; dateEl.value = iso;
 
   document.getElementById('bookForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var summary = document.getElementById('summary');
-    var name = document.getElementById('name').value.trim();
-    var svc = document.getElementById('service');
-    if (!name || !dateEl.value) {
-      summary.textContent = 'اكتب اسمك واختر التاريخ ثم أعد الإرسال.';
-      summary.classList.add('show');
-      return;
-    }
-    var d = new Date(dateEl.value + 'T12:00:00');
-    var dateText = d.toLocaleDateString('ar', { weekday: 'long', day: 'numeric', month: 'long' });
-    summary.textContent = 'طلب موعد باسم ' + name + ': ' + svc.value + '، ' + dateText + ' الساعة ' + timeEl.value +
-      '.  او راسلنا على الوتساب اتصل بنا على الرقم أعلاه لتأكيد الموعد.';
+  e.preventDefault();
+
+  var summary = document.getElementById('summary');
+  var name = document.getElementById('name').value.trim();
+  var svc = document.getElementById('service');
+
+  if (!name || !dateEl.value) {
+    summary.textContent = 'اكتب اسمك واختر التاريخ ثم أعد الإرسال.';
     summary.classList.add('show');
+    return;
+  }
+
+  var d = new Date(dateEl.value + 'T12:00:00');
+  var dateText = d.toLocaleDateString('ar', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
   });
-</script>
-</body>
-</html>
+
+  var message =
+    'السلام عليكم، أريد حجز موعد في الدقة للبصريات\n\n' +
+    'الاسم: ' + name + '\n' +
+    'الخدمة: ' + svc.value + '\n' +
+    'التاريخ: ' + dateText + '\n' +
+    'الوقت: ' + timeEl.value;
+
+  var whatsappUrl =
+    'https://wa.me/9647853371010?text=' +
+    encodeURIComponent(message);
+
+  window.open(whatsappUrl, '_blank');
+
+  summary.textContent = 'سيتم فتح واتساب لإرسال طلب الموعد.';
+  summary.classList.add('show');
+});
